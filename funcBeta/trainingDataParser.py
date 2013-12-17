@@ -82,8 +82,6 @@ class SAXHandler(xml.sax.handler.ContentHandler):
     def characters(self, content):
         topOfStack = self.xmlStack.pop()
         if len(content) > 2:
-            # print topOfStack
-            # print content
             self.currReview.add(topOfStack,content)
         topOfStack = self.xmlStack.append(topOfStack)
 
@@ -92,8 +90,8 @@ class reviewDB():
     def __init__(self ):
         userName = 'ai_user'
         passKey = 'letmein'
-        hostDomain = 'ec2-54-245-98-196.us-west-2.compute.amazonaws.com'
-        # hostDomain = 'localhost'
+        # hostDomain = 'ec2-54-245-98-196.us-west-2.compute.amazonaws.com'
+        hostDomain = 'localhost'
         portNumber = 3306
         dbName = 'milkntweetz'
 
@@ -139,8 +137,8 @@ def main(sourceFileName):
     for fileName in fileNames:
         reviews = Reviews()
         xml.sax.parse(PseudoReviews(fileName), SAXHandler(reviews))
-        # rL = reviewDB()
-        # rL.log(reviews.getReviews())
+        rL = reviewDB()
+        rL.log(reviews.getReviews())
 
 if __name__ == "__main__":
   main("../reviewTrainingData/review_data/")
