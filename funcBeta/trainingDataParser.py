@@ -9,8 +9,8 @@ class TrainingDatabase():
     def __init__(self ):
         user_name = 'ai_user'
         pass_key = 'letmein'
-        host_domain = 'ec2-54-245-98-196.us-west-2.compute.amazonaws.com'
-        # host_domain = 'localhost'
+        # host_domain = 'ec2-54-245-98-196.us-west-2.compute.amazonaws.com'
+        host_domain = 'localhost'
         port_number = 3306
         db_name = 'milkntweetz'
 
@@ -80,10 +80,11 @@ class TrainingDatabase():
 
 if __name__ == "__main__":
     db = TrainingDatabase()
-    fileNames = glob.glob("../reviewTrainingData/review_data/electronics/*.review")
+    fileNames = glob.glob("../reviewTrainingData/review_data/*/*.review")
     for fileName in fileNames:
-        f = open(fileName)
-        soup = BeautifulSoup(f)
-        db.log(soup)
-        soup.decompose()
+        with open(fileName) as f:
+            soup = BeautifulSoup(f)
+            print fileName, len(soup)
+            db.log(soup)
+            soup.decompose
  
