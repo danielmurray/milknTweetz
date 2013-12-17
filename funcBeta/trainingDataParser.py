@@ -9,8 +9,8 @@ class TrainingDatabase():
     def __init__(self ):
         user_name = 'ai_user'
         pass_key = 'letmein'
-        # host_domain = 'ec2-54-245-98-196.us-west-2.compute.amazonaws.com'
-        host_domain = 'localhost'
+        host_domain = 'ec2-54-245-98-196.us-west-2.compute.amazonaws.com'
+        # host_domain = 'localhost'
         port_number = 3306
         db_name = 'milkntweetz'
 
@@ -26,13 +26,15 @@ class TrainingDatabase():
 
         self.metadata = MetaData(self.db)
 
+        self.truncate_table([
+            'test_training_data',
+            'cv_data',
+            'training_data'
+        ])
 
     def log(self, soup):
         reviews = soup.find_all('review')
         for i, review in enumerate(reviews):
-            # print self.fetch_n_format(review, 'reviewer')
-            # print self.fetch_n_format(review, 'product_name')
-            # print ' --- '
             if i%10 == 0:
                 self.insert('test_training_data', review)
             elif i%10 == 1:
@@ -67,15 +69,21 @@ class TrainingDatabase():
 
     def fetch_n_format(self, soup, tag):
         fetch_text = soup.find(tag)
-        format_text = re.sub('\n','',fetch_text.contents[0])
+        format_text = unicode(re.sub('\n','',fetch_text.contents[0]))
         return format_text
 
+    def truncate_table(self,table_ids):
+        for table_id in table_ids:
+            table = Table(table_id, self.metadata, autoload=True)
+            stmt = table.delete()
+            stmt.execute()
+
 if __name__ == "__main__":
+    db = TrainingDatabase()
     fileNames = glob.glob("../reviewTrainingData/review_data/*/*.review")
     for fileName in fileNames:
         f = open(fileName)
         soup = BeautifulSoup(f)
-        db = TrainingDatabase()
         db.log(soup)
 
  
