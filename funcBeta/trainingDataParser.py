@@ -86,5 +86,4 @@ if __name__ == "__main__":
         soup = BeautifulSoup(f)
         db.log(soup)
         soup.decompose()
-
  
