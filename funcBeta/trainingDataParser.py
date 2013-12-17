@@ -5,6 +5,7 @@ from unidecode import unidecode
 import re
 from sqlalchemy import *
 import sys
+import glob
 
 
 class PseudoReviews(object):
@@ -89,7 +90,8 @@ class reviewDB():
     def __init__(self ):
         userName = 'ai_user'
         passKey = 'letmein'
-        hostDomain = 'ec2-54-245-98-196.us-west-2.compute.amazonaws.com'
+        # hostDomain = 'ec2-54-245-98-196.us-west-2.compute.amazonaws.com'
+        hostDomain = 'localhost'
         portNumber = 3306
         dbName = 'milkntweetz'
 
@@ -128,15 +130,16 @@ class reviewDB():
         try:
             stmt.execute()
         except:
-            print review['product_name']
             print sys.exc_info()[0]
 
 def main(sourceFileName):
-    reviews = Reviews()
-    xml.sax.parse(PseudoReviews(sourceFileName), SAXHandler(reviews))
-    rL = reviewDB()
-    rL.log(reviews.getReviews())
+    fileNames = glob.glob(sourceFileName+'*/all.review')
+    for fileName in fileNames:
+        reviews = Reviews()
+        xml.sax.parse(PseudoReviews(fileName), SAXHandler(reviews))
+        rL = reviewDB()
+        rL.log(reviews.getReviews())
 
 if __name__ == "__main__":
-  main("review_data/electronics/all.review")
+  main("../reviewTrainingData/review_data/")
  
