@@ -1,114 +1,38 @@
-import xml.sax
-import xml.sax.handler
-from xml.sax.saxutils import escape
-from unidecode import unidecode
-import re
+from bs4 import BeautifulSoup
 from sqlalchemy import *
 import sys
 import glob
+import re
 
-
-class PseudoReviews(object):
-
-    def __init__(self, sourceFileName):
-        self.ri = self.read_iterator()
-        self.fileName = sourceFileName
-        self.file = open(self.fileName)
-
-
-    def read_iterator(self):
-        yield '<xml>'
-        for line in self.file:
-            #Dealing with all the bull shit that is text formats
-            noForeignCharacters = unidecode(line)
-            noAmpersands = re.sub('&', '&amp;', noForeignCharacters)
-            cleanText = re.sub("", "", noAmpersands)
-            yield cleanText
-        yield '</xml>'
-
-    def read(self, *foo):
-        try:
-            return self.ri.next()
-        except StopIteration:
-            return ''
-
-class ReviewDict():
-
-    def __init__(self):
-        self.review = {}
-
-    def add(self, name, content):
-        self.review[name] = content
-        
-    def printReview(self):
-        for key in  self.review.keys():
-            print key, '-', self.review[key]
-            
-class Reviews():
-
-    def __init__(self):
-        self.reviews = []
-
-    def add(self, review):
-        self.reviews.append(review)
-        
-    def printReviews(self):
-        for review in  self.reviews:
-            print review.printReview()
-
-    def howMany(self):
-        return len(self.reviews)
-
-    def getReviews(self):
-        return self.reviews
-
-class SAXHandler(xml.sax.handler.ContentHandler):
-
-    def __init__(self, reviews):
-        xml.sax.ContentHandler.__init__(self)
-        self.xmlStack = []
-        self.currReview = ReviewDict()
-        self.reviews = reviews
-
-    def startElement(self, name, attrs):
-        self.xmlStack.append(name)
-
-    def endElement(self, name):
-        if name == 'review':
-            self.reviews.add(self.currReview)
-            self.currReview = ReviewDict()
-        self.xmlStack.pop()
-
-    def characters(self, content):
-        topOfStack = self.xmlStack.pop()
-        if len(content) > 2:
-            self.currReview.add(topOfStack,content)
-        topOfStack = self.xmlStack.append(topOfStack)
-
-class reviewDB():
+class TrainingDatabase():
 
     def __init__(self ):
-        userName = 'ai_user'
-        passKey = 'letmein'
-        # hostDomain = 'ec2-54-245-98-196.us-west-2.compute.amazonaws.com'
-        hostDomain = 'localhost'
-        portNumber = 3306
-        dbName = 'milkntweetz'
+        user_name = 'ai_user'
+        pass_key = 'letmein'
+        # host_domain = 'ec2-54-245-98-196.us-west-2.compute.amazonaws.com'
+        host_domain = 'localhost'
+        port_number = 3306
+        db_name = 'milkntweetz'
 
         self.db = create_engine('mysql://' 
-            + userName + ':' 
-            + passKey + '@' 
-            + hostDomain + ':' 
-            + str(portNumber) + '/'
-            + dbName
+            + user_name + ':' 
+            + pass_key + '@' 
+            + host_domain + ':' 
+            + str(port_number) + '/'
+            + db_name
         )
 
         self.db.echo = False  # Try changing this to True and see what happens
 
         self.metadata = MetaData(self.db)
 
-    def log(self, reviews):
+
+    def log(self, soup):
+        reviews = soup.find_all('review')
         for i, review in enumerate(reviews):
+            # print self.fetch_n_format(review, 'reviewer')
+            # print self.fetch_n_format(review, 'product_name')
+            # print ' --- '
             if i%10 == 0:
                 self.insert('test_training_data', review)
             elif i%10 == 1:
@@ -116,30 +40,42 @@ class reviewDB():
             else:
                 self.insert('training_data', review)
 
-    def insert(self, tableName, reviewObj):
-        table = Table(tableName, self.metadata, autoload=True)
-        review = reviewObj.review 
+
+    def insert(self, table_name, review_soup):
+        
+        comment = self.fetch_n_format(review_soup, 'review_text')
+        rating = self.fetch_n_format(review_soup, 'rating')
+        reviewer = self.fetch_n_format(review_soup, 'reviewer')
+        asin = self.fetch_n_format(review_soup, 'asin')
+        product_type = self.fetch_n_format(review_soup, 'product_type')
+        product_name = self.fetch_n_format(review_soup, 'product_name')
+
+        table = Table(table_name, self.metadata, autoload=True)
+
         stmt = table.insert().values({
-            "comment" : review.get('review_text'),
-            "known_score" : int(float(review.get('rating'))),
-            "created_by" : review.get('reviewer'),
-            "asin" : review.get('asin'),
-            "product_type" : review.get('product_type'),
-            "product_name" : review.get('product_name')
+            "comment" : comment,
+            "known_score" : int(float(rating)),
+            "created_by" : reviewer,
+            "asin" : asin,
+            "product_type" : product_type,
+            "product_name" : product_name
         })
         try:
             stmt.execute()
         except:
             print sys.exc_info()[0]
 
-def main(sourceFileName):
-    fileNames = glob.glob(sourceFileName+'video/all.review')
-    for fileName in fileNames:
-        reviews = Reviews()
-        xml.sax.parse(PseudoReviews(fileName), SAXHandler(reviews))
-        rL = reviewDB()
-        rL.log(reviews.getReviews())
+    def fetch_n_format(self, soup, tag):
+        fetch_text = soup.find(tag)
+        format_text = re.sub('\n','',fetch_text.contents[0])
+        return format_text
 
 if __name__ == "__main__":
-  main("../reviewTrainingData/review_data/")
+    fileNames = glob.glob("../reviewTrainingData/review_data/*/*.review")
+    for fileName in fileNames:
+        f = open(fileName)
+        soup = BeautifulSoup(f)
+        db = TrainingDatabase()
+        db.log(soup)
+
  
