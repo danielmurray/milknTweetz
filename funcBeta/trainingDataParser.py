@@ -80,10 +80,11 @@ class TrainingDatabase():
 
 if __name__ == "__main__":
     db = TrainingDatabase()
-    fileNames = glob.glob("../reviewTrainingData/review_data/*/*.review")
+    fileNames = glob.glob("../reviewTrainingData/review_data/dvd/*.review")
     for fileName in fileNames:
         f = open(fileName)
         soup = BeautifulSoup(f)
-        db.log(soup)
-
+        print fileName, len(soup)
+        #db.log(soup)
+        soup.decompose()
  
