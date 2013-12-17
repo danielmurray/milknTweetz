@@ -20,8 +20,10 @@ class PseudoReviews(object):
         yield '<xml>'
         for line in self.file:
             #Dealing with all the bull shit that is text formats
-            text = re.sub('&', '&amp;', unidecode(line))
-            yield text
+            noForeignCharacters = unidecode(line)
+            noAmpersands = re.sub('&', '&amp;', noForeignCharacters)
+            cleanText = re.sub("", "", noAmpersands)
+            yield cleanText
         yield '</xml>'
 
     def read(self, *foo):
@@ -90,8 +92,8 @@ class reviewDB():
     def __init__(self ):
         userName = 'ai_user'
         passKey = 'letmein'
-        # hostDomain = 'ec2-54-245-98-196.us-west-2.compute.amazonaws.com'
-        hostDomain = 'localhost'
+        hostDomain = 'ec2-54-245-98-196.us-west-2.compute.amazonaws.com'
+        # hostDomain = 'localhost'
         portNumber = 3306
         dbName = 'milkntweetz'
 
@@ -133,12 +135,12 @@ class reviewDB():
             print sys.exc_info()[0]
 
 def main(sourceFileName):
-    fileNames = glob.glob(sourceFileName+'*/all.review')
+    fileNames = glob.glob(sourceFileName+'video/all.review')
     for fileName in fileNames:
         reviews = Reviews()
         xml.sax.parse(PseudoReviews(fileName), SAXHandler(reviews))
-        rL = reviewDB()
-        rL.log(reviews.getReviews())
+        # rL = reviewDB()
+        # rL.log(reviews.getReviews())
 
 if __name__ == "__main__":
   main("../reviewTrainingData/review_data/")
