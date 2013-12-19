@@ -44,7 +44,6 @@ def word_into_lexicon(word, ham_or_spam):
 
 	if db_word == None:
 		#add to dictionary
-		print word
 		lexicon = ham_or_spam(
 			word= word, 
 			count=1
@@ -52,7 +51,6 @@ def word_into_lexicon(word, ham_or_spam):
 		session.add(lexicon)
 	else:
 		#increment count
-		print db_word.word, db_word.count
 		db_word.count = db_word.count + 1
 
 
@@ -75,7 +73,8 @@ def stickItInHamSpam(review):
 
 userName = 'ai_user'
 passKey = 'letmein'
-hostDomain = 'ec2-54-245-98-196.us-west-2.compute.amazonaws.com'
+# hostDomain = 'ec2-54-245-98-196.us-west-2.compute.amazonaws.com'
+hostDomain = 'localhost'
 portNumber = 3306
 dbName = 'milkntweetz'
 
@@ -95,9 +94,7 @@ db.echo = False  # Try changing this to True and see what happens
 SessionClass = sessionmaker(bind=db)
 session = SessionClass()
 
-test = 0
-
-while test < 2:
+while True:
 	review = session.query(Review).filter_by(viewed=0).first()
 
 	print review.product_name
@@ -109,6 +106,4 @@ while test < 2:
 
 	review.viewed = 1
 	session.commit()
-
-	test= test+1
 		
