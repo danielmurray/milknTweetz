@@ -20,8 +20,8 @@ class TestReview(Base):
 
 userName = 'ai_user'
 passKey = 'letmein'
-hostDomain = 'ec2-54-245-98-196.us-west-2.compute.amazonaws.com'
-# hostDomain = 'localhost'
+# hostDomain = 'ec2-54-245-98-196.us-west-2.compute.amazonaws.com'
+hostDomain = 'localhost'
 portNumber = 3306
 dbName = 'milkntweetz'
 
@@ -42,15 +42,14 @@ SessionClass = sessionmaker(bind=db)
 session = SessionClass()
 
 review_count = 100
-reviews = session.query(TestReview).limit(review_count).all()
+reviews = session.query(TestReview).order_by(func.rand()).limit(review_count).all()
 
 successes = 0
 for review in reviews:
-	print review.product_name
 	sentiment = Beta(review.comment, session)
 	given = review.known_score
-	calculated = sentiment.getscore()
-	print given, calculated
+	calculated = sentiment.get_score()
+	print review.product_name, given, calculated
 	if given in [4,5] and calculated > 0:
 		successes = successes + 1
 	elif given in [1,2] and calculated < 0:
