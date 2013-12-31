@@ -20,8 +20,8 @@ class TestReview(Base):
 
 userName = 'ai_user'
 passKey = 'letmein'
-# hostDomain = 'ec2-54-245-98-196.us-west-2.compute.amazonaws.com'
-hostDomain = 'localhost'
+hostDomain = 'ec2-54-245-98-196.us-west-2.compute.amazonaws.com'
+# hostDomain = 'localhost'
 portNumber = 3306
 dbName = 'milkntweetz'
 
@@ -41,19 +41,31 @@ db.echo = False  # Try changing this to True and see what happens
 SessionClass = sessionmaker(bind=db)
 session = SessionClass()
 
+print session
 review_count = 100
 reviews = session.query(TestReview).order_by(func.rand()).limit(review_count).all()
+print len(reviews)
 
-successes = 0
-for review in reviews:
-	sentiment = Beta(review.comment, session)
+successes = {}
+successes['simple'] = 0
+successes['probability'] = 0
+successes['naive_bayes'] = 0
+
+for i,review in enumerate(reviews):
+	sentiment = Beta(session, review.comment)
 	given = review.known_score
-	calculated = sentiment.get_score()
-	print review.product_name, given, calculated
-	if given in [4,5] and calculated > 0:
-		successes = successes + 1
-	elif given in [1,2] and calculated < 0:
-		successes = successes + 1
+
+	print review.product_name, given
+
+	for test in ['simple', 'probability', 'naive_bayes']:
+		calculated_score = sentiment.get_score(test)
+		if given in [4,5] and calculated_score > 0:
+			successes[test] = successes + 1
+		elif given in [1,2] and calculated_score < 0:
+			successes[test] = successes + 1
+		print test, calculated_score, successes[test]/i
+
+
 
 print successes / review_count
 
