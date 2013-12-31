@@ -21,7 +21,7 @@ class TestReview(Base):
 userName = 'ai_user'
 passKey = 'letmein'
 hostDomain = 'ec2-54-245-98-196.us-west-2.compute.amazonaws.com'
-# hostDomain = 'localhost'
+#hostDomain = 'localhost'
 portNumber = 3306
 dbName = 'milkntweetz'
 
@@ -55,18 +55,13 @@ for i,review in enumerate(reviews):
 	sentiment = Beta(session, review.comment)
 	given = review.known_score
 
-	print review.product_name, given
+	print "-----Iteration " + str(i+1) + "---------- words-" + str(len(sentiment.words))
 
 	for test in ['simple', 'probability', 'naive_bayes']:
 		calculated_score = sentiment.get_score(test)
 		if given in [4,5] and calculated_score > 0:
-			successes[test] = successes + 1
+			successes[test] = successes[test] + 1
 		elif given in [1,2] and calculated_score < 0:
-			successes[test] = successes + 1
-		print test, calculated_score, successes[test]/i
-
-
-
-print successes / review_count
-
+			successes[test] = successes[test] + 1
+		print test, "-", float(successes[test])/(i+1)*100
 
