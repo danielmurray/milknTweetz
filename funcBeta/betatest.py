@@ -42,7 +42,7 @@ SessionClass = sessionmaker(bind=db)
 session = SessionClass()
 
 review_count = 100
-reviews = session.query(TestReview).order_by(func.rand()).limit(review_count).all()
+reviews = session.query(TestReview).limit(review_count).all()
 
 successes = {}
 successes['simple'] = 0
@@ -55,7 +55,7 @@ for i,review in enumerate(reviews):
 
 	print "-----Iteration " + str(i+1) + "---------- words-" + str(len(sentiment.words))
 	print given
-	for test in ['simple', 'probability', 'naive_bayes']:
+	for test in ['simple_bayes', 'probability', 'naive_bayes']:
 		calculated_score = sentiment.get_score(test)
 		if given in [4,5] and calculated_score > 0:
 			successes[test] = successes[test] + 1
