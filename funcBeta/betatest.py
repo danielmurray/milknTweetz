@@ -41,10 +41,8 @@ db.echo = False  # Try changing this to True and see what happens
 SessionClass = sessionmaker(bind=db)
 session = SessionClass()
 
-print session
 review_count = 100
 reviews = session.query(TestReview).order_by(func.rand()).limit(review_count).all()
-print len(reviews)
 
 successes = {}
 successes['simple'] = 0
@@ -56,12 +54,12 @@ for i,review in enumerate(reviews):
 	given = review.known_score
 
 	print "-----Iteration " + str(i+1) + "---------- words-" + str(len(sentiment.words))
-
+	print given
 	for test in ['simple', 'probability', 'naive_bayes']:
 		calculated_score = sentiment.get_score(test)
 		if given in [4,5] and calculated_score > 0:
 			successes[test] = successes[test] + 1
 		elif given in [1,2] and calculated_score < 0:
 			successes[test] = successes[test] + 1
-		print test, "-", float(successes[test])/(i+1)*100
+		print test, "-", calculated_score, "-", float(successes[test])/(i+1)*100
 
