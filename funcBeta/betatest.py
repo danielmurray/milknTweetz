@@ -45,7 +45,7 @@ review_count = 100
 reviews = session.query(TestReview).limit(review_count).all()
 
 successes = {}
-successes['simple'] = 0
+successes['simple_bayes'] = 0
 successes['probability'] = 0
 successes['naive_bayes'] = 0
 

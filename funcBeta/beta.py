@@ -85,7 +85,7 @@ class Beta():
 
 	def get_score(self, function):
 		if function is "simple_bayes":
-			score_function = self.simple
+			score_function = self.simple_bayes
 		elif function is "naive_bayes":
 			score_function = self.naive_bayes
 		else:
