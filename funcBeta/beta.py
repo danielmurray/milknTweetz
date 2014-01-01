@@ -32,9 +32,13 @@ class Beta():
 		self.ham_chance = self.total_ham_count/self.total_count
 		self.spam_chance = self.total_spam_count/self.total_count
 		self.words = []
+		self.score = 0
 		for word in self.tweet:
 			ham_count = self.get_word_count(word, Ham)
-			spam_count = self.get_word_count(word, Spam)			
+			spam_count = self.get_word_count(word, Spam)
+			word_score = self.naive_bayes(ham_count, spam_count)
+			self.score = self.score + word_score
+			print word, self.score, word_score		
 			self.words.append((word, ham_count, spam_count))
 
 	def simple_bayes(self, ham_count, spam_count):
@@ -116,7 +120,8 @@ if __name__ == "__main__":
 
 	SessionClass = sessionmaker(bind=db)
 	session = SessionClass()
-	review = Beta(session, "good bad love hate the")
-
+	# review = Beta(session, "good bad love hate the")
+	good = Beta(session, "These are, overall amazing headphones. They sound great, are comfortable, and easily driven by portable players. However, when I first bought them, and eagerly unwrapped the packaging and tried them out, I was bitterly dissapointed. Where had my money gone, I wondered. They sounded tin canny, and the bass had no punch. I nearly returned them. But, taking the advice of many reviewers, I plugged them into my computer and left the music playing loudly for nearly a week straight. And it paid off. After nearly a month's use, these headphones sound GREAT. I have fallen in love witht eh tight, clear treble and amazingly accurate bass that the HD-280s provide. Jazz and classical fans (and rockers too but to a lesser extent) will love these headphones. I could go on and on and on about the sound quality, but you would find your self reading needless repition of the words \"great,\" \"amazing,\" etcetc. The design is a little big, but very comfy. I can wear these for several hours at a time and my ears will feel fine. The way that they fold up is also very useful for the frequent traveler, and the stretchy wire design is also very handy, keeping the wire out of the way yet providing you nearly 3 meters worth of wire (if stretched to the max). I would also just like to note that, after several airplane trips, the noise reduction in these headphones is also wonderful, and the HD-280 Pros make airplane flights that much more enjoyable. In conclusion, wait at LEAST two weeks, preferably more before judging these headphones, because the more you use them, the better they sound. And after a month's worth of use, they sound great. And they also fit great, and are extremely comfortable. The price too, isn't too bad, and I found them at ... for [$$$], including shipping from the states to taiwan. Do your ears a favor, and buy a pair of HD 280s.")
+	
 
 
